@@ -14,7 +14,11 @@ def sigmoid(x):
     :param x: wektor wejsciowych wartosci Nx1
     :return: wektor wyjściowych wartości funkcji sigmoidalnej dla wejścia x, Nx1
     """
-    pass
+    result = []
+    for elem in x:
+        result.append(1/(1+np.exp(-elem)))
+    return result
+    #pass
 
 def logistic_cost_function(w, x_train, y_train):
     """
@@ -79,7 +83,18 @@ def f_measure(y_true, y_pred):
     :param y_pred: wektor etykiet przewidzianych przed model Nx1
     :return: funkcja wylicza wartosc miary F
     """
-    pass
+    tp = 0
+    fp = 0
+    fn = 0
+    for i in range(y_true.shape[0]):
+        if(y_true[i]==1 and y_pred[i]==1):
+            tp +=1
+        if(y_pred[i]==0 and y_true[i]==1):
+            fn +=1
+        if(y_pred[i]==1 and y_true[i]==0):
+            fp +=1
+    return (2*tp)/((2*tp)+fp+fn)        
+    #pass
 
 def model_selection(x_train, y_train, x_val, y_val, w0, epochs, eta, mini_batch, lambdas, thetas):
     """
