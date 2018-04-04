@@ -91,7 +91,14 @@ def regularized_logistic_cost_function(w, x_train, y_train, regularization_lambd
     :return: funkcja zwraca krotke (val, grad), gdzie val oznacza wartosc funkcji logistycznej z regularyzacja l2,
     a grad jej gradient po w
     """
-    pass
+    val, grad = logistic_cost_function(w, x_train, y_train)
+    w_nozero = w[1:w.shape[0]]
+    val = val + ((regularization_lambda/2)*(np.linalg.norm(w_nozero)**2))
+    w_derivative = w.copy()
+    w_derivative[0] = 0 #pochodna wyrazu wolnego
+    grad = grad + regularization_lambda*w_derivative
+    return val, grad
+    #pass
 
 def prediction(x, w, theta):
     """
@@ -101,7 +108,13 @@ def prediction(x, w, theta):
     :return: funkcja wylicza wektor y o wymiarach Nx1. Wektor zawiera wartosci etykiet ze zbioru {0,1} dla obserwacji z x
      bazujac na modelu z parametrami w oraz progu klasyfikacji theta
     """
-    pass
+    y = []
+    sigmas = sigmoid(x.dot(w))
+    for sigma in sigmas:
+        y.append(sigma>theta)
+    y = np.array(y)
+    return y
+    #pass
 
 def f_measure(y_true, y_pred):
     """
@@ -139,4 +152,22 @@ def model_selection(x_train, y_train, x_val, y_val, w0, epochs, eta, mini_batch,
     Dodatkowo funkcja zwraca macierz F, ktora zawiera wartosci miary F dla wszystkich par (lambda, theta). Do uczenia nalezy
     korzystac z algorytmu SGD oraz kryterium uczenia z regularyzacja l2.
     """
-    pass
+    best_measure = 0
+    best_lambda = lambdas[0]
+    best_theta = thetas[0]
+    best_w = w0
+    F = []
+    for l in lambdas:
+        fun = lambda w,x_train,y_train: regularized_logistic_cost_function(w, x_train, y_train, l)
+        w = stochastic_gradient_descent(fun, x_train, y_train, w0, epochs, eta, mini_batch)[0]
+        for theta in thetas:
+            curr_measure = f_measure(y_val, prediction(x_val, w, theta))
+            F.append(curr_measure)
+            if curr_measure>best_measure:
+                best_measure = curr_measure
+                best_lambda = l
+                best_theta = theta
+                best_w = w
+    F = np.array(F).reshape(len(lambdas),len(thetas))
+    return best_lambda, best_theta, best_w, F
+    #pass
