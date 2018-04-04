@@ -14,10 +14,7 @@ def sigmoid(x):
     :param x: wektor wejsciowych wartosci Nx1
     :return: wektor wyjściowych wartości funkcji sigmoidalnej dla wejścia x, Nx1
     """
-    result = []
-    for elem in x:
-        result.append(1/(1+np.exp(-elem)))
-    return result
+    return 1/(1+np.exp(-x))
     #pass
 
 def logistic_cost_function(w, x_train, y_train):
@@ -27,7 +24,13 @@ def logistic_cost_function(w, x_train, y_train):
     :param y_train: ciag treningowy - wyjscia Nx1
     :return: funkcja zwraca krotke (val, grad), gdzie val oznacza wartosc funkcji logistycznej, a grad jej gradient po w
     """
-    pass
+    N = y_train.shape[0]
+    sigmas = sigmoid(x_train.dot(w))
+    cost = y_train*(np.log(sigmas)) + (1-y_train)*(np.log(1-sigmas))
+    val = (-1/N)*np.sum(cost)
+    grad = np.dot(x_train.T, sigmas-y_train) / N
+    return val, grad
+    #pass
 
 def gradient_descent(obj_fun, w0, epochs, eta):
     """
@@ -36,9 +39,18 @@ def gradient_descent(obj_fun, w0, epochs, eta):
     :param epochs: liczba epok / iteracji algorytmu
     :param eta: krok uczenia
     :return: funkcja wykonuje optymalizacje metoda gradientu prostego dla funkcji obj_fun. Zwraca krotke (w,func_values),
-    gdzie w oznacza znaleziony optymalny punkt w, a func_valus jest wektorem wartosci funkcji [epochs x 1] we wszystkich krokach algorytmu
+    gdzie w oznacza znaleziony optymalny punkt w, a func_values jest wektorem wartosci funkcji [epochs x 1] we wszystkich krokach algorytmu
     """
-    pass
+    func_values = []
+    w = w0
+    grad = obj_fun(w)[1]
+    for i in range(epochs):
+        w = w - (eta*grad)
+        curr_val, grad = obj_fun(w)
+        func_values.append(curr_val)
+    func_values = np.array(func_values, ndmin = 2)
+    return w, func_values.T
+    #pass
 
 def stochastic_gradient_descent(obj_fun, x_train, y_train, w0, epochs, eta, mini_batch):
     """
@@ -54,7 +66,21 @@ def stochastic_gradient_descent(obj_fun, x_train, y_train, w0, epochs, eta, mini
     gdzie w oznacza znaleziony optymalny punkt w, a func_values jest wektorem wartosci funkcji [epochs x 1] we wszystkich krokach algorytmu. Wartosci
     funkcji do func_values sa wyliczane dla calego zbioru treningowego!
     """
-    pass
+    M = x_train.shape[0]/mini_batch
+    M = int(M)
+    w = w0
+    func_values = []
+    for i in range(epochs):
+        for m in range(M):
+            x_sub = x_train[m*mini_batch: (m+1)*mini_batch]
+            y_sub = y_train[m*mini_batch: (m+1)*mini_batch]
+            grad = obj_fun(w, x_sub, y_sub)[1]
+            w = w - (eta*grad)
+        val = obj_fun(w, x_train, y_train)[0]
+        func_values.append(val)
+    func_values = np.array(func_values, ndmin = 2)
+    return w, func_values.T
+    #pass
 
 def regularized_logistic_cost_function(w, x_train, y_train, regularization_lambda):
     """
